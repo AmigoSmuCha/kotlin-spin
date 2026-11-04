@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description">A glossy 3D logo, raymarched into ASCII. Two-finger drag to spin, pinch to zoom.</string>
+    <string name="author">aphex_spin</string>
+</resources>

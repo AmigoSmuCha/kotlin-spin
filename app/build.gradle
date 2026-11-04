@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.aphexspin.wallpaper'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.aphexspin.wallpaper'
+        minSdk 26
+        targetSdk 35
+        // every GitHub build gets a higher number, so a new APK installs over the old one
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1') as Integer)
+        versionName "1.0.${System.getenv('GITHUB_RUN_NUMBER') ?: '0'}"
+    }
+
+    signingConfigs {
+        // A fixed key kept in the repo so updates install over earlier builds.
+        // It only signs this hobby app; swap it for a private key if you ever publish.
+        release {
+            storeFile rootProject.file('keystore/aphexspin.jks')
+            storePassword 'aphexspin'
+            keyAlias 'aphexspin'
+            keyPassword 'aphexspin'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
