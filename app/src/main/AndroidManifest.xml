@@ -4,15 +4,15 @@
     <uses-feature android:name="android.software.live_wallpaper" android:required="true" />
 
     <application
-        android:label="Aphex Spin"
+        android:label="Aphex Chrome"
         android:icon="@drawable/icon"
         android:allowBackup="true"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
 
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
-            android:label="Aphex Spin">
+            android:label="Aphex Chrome">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -20,9 +20,9 @@
         </activity>
 
         <service
-            android:name=".SpinWallpaper"
+            android:name=".ChromeWallpaper"
             android:exported="true"
-            android:label="Aphex Spin"
+            android:label="Aphex Chrome"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />

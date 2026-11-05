@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="com.aphexspin.wallpaper.SettingsActivity"
+    android:settingsActivity="com.aphexspin.chrome.SettingsActivity"
     android:thumbnail="@drawable/thumb"
     android:description="@string/description"
     android:author="@string/author" />

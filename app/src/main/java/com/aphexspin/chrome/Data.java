@@ -1,10 +1,10 @@
-package com.aphexspin.wallpaper;
+package com.aphexspin.chrome;
 
-/** Data generated from aphex_spin.py: logo outline and glyph shape vectors. */
+/** Shape vectors of the 95 printable ASCII glyphs (DejaVu Sans Mono), from aphex_spin.py:
+ *  the share of ink inside each of six sampling circles, normalised per circle. */
 final class Data {
     private Data() {}
-    static final double[] LOGO_POLY = {20.45, -16.54, 20.45, -12.89, 19.64, -12.37, 13.09, 12.21, 11.55, 13.38, 9.44, 16.96, -19.35, 16.96, -20.45, 14.04, -17.8, 9.36, -8.22, 9.22, -5.3, 12.63, -4.05, 12.39, -3.25, 11.04, -3.38, 9.46, -9.67, -2.46, -11.3, -3.3, -13.37, -7.46, -12.89, -10.48, -9.86, -10.62, -4.14, -3.17, 0.2, -2.13, 1.07, 0.04, 0.67, 4.54, 2.95, 5.24, 11.67, -8.29, 13.2, -9.36, 17.03, -16.96, 18.78, -16.96};
-    // GLYPH_CHARS are ASCII 32..126 in order; GLYPH_VEC has 6 floats per glyph.
+
     static final float[] GLYPH_VEC = {
         0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.419f, 0.279f, 0.291f, 0.387f, 0.105f, 0.211f,
         0.512f, 0.406f, 0.025f, 0.140f, 0.000f, 0.000f, 0.442f, 0.492f, 0.908f, 1.000f, 0.257f, 0.252f,

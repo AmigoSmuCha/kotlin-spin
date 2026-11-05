@@ -13,26 +13,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
+
       - name: Build
         run: gradle :app:assembleRelease --no-daemon --stacktrace
+
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk AphexSpin.apk
+        run: cp app/build/outputs/apk/release/app-release.apk AphexChrome.apk
+
       - uses: actions/upload-artifact@v4
         with:
-          name: AphexSpin
-          path: AphexSpin.apk
+          name: AphexChrome
+          path: AphexChrome.apk
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Aphex Spin (build ${{ github.run_number }})
-          body: Download AphexSpin.apk below on your phone and open it to install.
-          files: AphexSpin.apk
+          name: Aphex Chrome (build ${{ github.run_number }})
+          body: Download AphexChrome.apk below on your phone and open it to install.
+          files: AphexChrome.apk
           make_latest: true

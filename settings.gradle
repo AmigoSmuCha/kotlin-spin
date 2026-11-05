@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "AphexSpin"
+rootProject.name = "AphexChrome"
 include ':app'

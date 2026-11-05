@@ -1,49 +1,65 @@
-# Aphex Spin — live wallpaper
+# Aphex Chrome — live wallpaper
 
-A glossy 3D logo, raymarched and drawn in ASCII, as an Android live wallpaper.
-It's a Java port of `aphex_spin.py`: same model, lighting and shape-matched
-glyphs. No libraries, about 1 MB.
+An inflated chrome logo, raymarched and drawn in ASCII, as an Android live
+wallpaper. It's a Java port of `aphex_spin.py` (included): the same balloon,
+sky, sparkles, nine palettes and six finishes. It's checked frame for frame
+against the script's `--preview`, with the same glyph and the same colour in
+every cell. No libraries; the APK is about 1 MB.
+
+Colours follow the focus / cornholio Design System. Each palette is closed,
+with every tone derived from its six roles, and a change of palette
+cross-fades the whole picture in 0.9 s. Notes are short, lowercase and leave
+on their own.
 
 ## Gestures
 
-Everything uses two or three fingers, so the launcher's one-finger swipes
-(pages, app drawer) never move the model.
+Everything takes two or three fingers, so the launcher's one-finger swipes
+(pages, the app drawer) never move the model.
 
 | Gesture | Does |
 |---|---|
-| two-finger drag | spin it (let go mid-swing and it keeps the momentum); the light follows your fingers |
+| two-finger drag | spin it, let go mid-swing and it keeps the momentum; the sun follows your fingers |
 | pinch | zoom |
-| two-finger tap | next material (lilac, obsidian, chrome, bone, acid, ember) |
-| three-finger tap | reset |
+| tap with two fingers | next palette |
+| tap with three fingers | next finish |
+| hold two fingers still | back to the start |
 
 ## Getting it on the phone
 
-1. Create a new GitHub repository and upload everything in this folder,
-   including the hidden `.github` folder. (If the web uploader skips it, use
-   *Add file → Create new file*, name it `.github/workflows/build.yml` and paste
-   the file's contents in.)
-2. GitHub builds the app automatically: see the **Actions** tab (about 3–4 minutes).
-3. On the phone, open the repo's **Releases** page, download `AphexSpin.apk`
-   and open it. Allow your browser to install unknown apps when asked.
-4. Open **Aphex Spin** from the app drawer → **Set as wallpaper**, and choose
-   home screen, or home and lock screen.
+1. Create a new GitHub repository and push everything in this folder,
+   including the hidden `.github` folder, to its top level.
+2. GitHub builds the app on its own: watch the **Actions** tab (3–4 minutes).
+3. On the phone, open the repository's **Releases** page, download
+   `AphexChrome.apk` and open it.
+4. Open **Aphex Chrome** from the app drawer and tap **wallpaper · set it**.
+   Choose home, or home and lock screen.
 
-Each push to `main` builds a new release, and it installs over the old one.
+Every push to `main` builds a new release, which installs over the old one.
+It lives alongside the first wallpaper (Aphex Spin); they are separate apps.
 
 ## Settings
 
-Material, glyph style, characters across the screen, contrast, auto-spin speed,
-frame rate, a battery saver (auto-spin stops 30 s after you last touched it or
-unlocked), and the clock: always, lock screen only, or off, at the top or
-bottom. The clock follows the phone's time zone; tick *Fixed UTC+1* to pin it
-to UTC+1 all year.
+One plate under a live preview (drag the preview with one finger). Tap a row
+to go forward, hold it to go back. Every change shows at once and is saved.
 
-The wallpaper draws nothing while it's hidden or the screen is off, and it
-sleeps when nothing is moving.
+palette · finish · glyphs (shape, ramp, blocks) · letters (all, symbols) ·
+sky behind · sparkles · ground · size (characters across) · contrast · spin ·
+puff (how far the balloon is inflated) · frame rate · battery saver ·
+clock (always, lock screen only, off) · clock place · time zone (the phone's,
+or fixed utc+1).
+
+The wallpaper draws nothing while it's hidden or the screen is off. It sleeps
+when nothing moves, runs at your frame rate while it spins, and at 45 fps at
+least while you touch it.
 
 ## Files
 
-- `app/src/main/java/.../AsciiRenderer.java`: the renderer (pure Java, testable on a PC)
-- `SpinWallpaper.java`: the wallpaper service, gestures and clock
-- `SettingsActivity.java`: the settings screen
-- `keystore/aphexspin.jks`: the signing key, kept here so updates install over each other
+- `app/src/main/java/com/aphexspin/chrome/`
+  - `Palette`, `EnvMap`, `Balloon`, `Tracer`, `Ascii`, `Scene`: the renderer, pure Java
+  - `Runner`, `Painter`, `ChromeWallpaper`, `PreviewView`, `SettingsActivity`: the Android side
+- `app/src/main/assets/balloon.bin`: the balloon's inflation field (the script's
+  Poisson solve, baked so the phone doesn't have to run it)
+- `tools/bake_balloon.py`: rebakes it, also for another logo:
+  `python3 tools/bake_balloon.py aphex_spin.py app/src/main/assets/balloon.bin logo.png`
+- `tools/parity/run.sh`: checks the Java renderer against `aphex_spin.py --preview`
+- `keystore/aphexchrome.jks`: the signing key, kept here so updates install over each other
