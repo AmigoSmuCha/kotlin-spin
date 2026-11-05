@@ -1,8 +1,8 @@
+CornholioNCS.zip
 .gradle/
 build/
 app/build/
 local.properties
 *.iml
 .idea/
-*.zip
-
+__pycache__/

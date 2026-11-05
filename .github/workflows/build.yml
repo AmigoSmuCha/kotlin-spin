@@ -27,18 +27,18 @@ jobs:
         run: gradle :app:assembleRelease --no-daemon --stacktrace
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk AphexChrome.apk
+        run: cp app/build/outputs/apk/release/app-release.apk CornholioNCS.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: AphexChrome
-          path: AphexChrome.apk
+          name: CornholioNCS
+          path: CornholioNCS.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          name: Aphex Chrome (build ${{ github.run_number }})
-          body: Download AphexChrome.apk below on your phone and open it to install.
-          files: AphexChrome.apk
+          name: Cornholio NCS (build ${{ github.run_number }})
+          body: Download CornholioNCS.apk below on your phone and open it to install.
+          files: CornholioNCS.apk
           make_latest: true

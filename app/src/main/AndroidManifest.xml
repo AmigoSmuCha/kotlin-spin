@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- to hear what the phone plays (Android's Visualizer on the output mix);
+         Android calls this recording audio, but nothing is recorded or kept -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
     <uses-feature android:name="android.software.live_wallpaper" android:required="true" />
+    <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
     <application
-        android:label="Aphex Chrome"
+        android:label="Cornholio NCS"
         android:icon="@drawable/icon"
         android:allowBackup="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
@@ -12,7 +18,7 @@
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
-            android:label="Aphex Chrome">
+            android:label="Cornholio NCS">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -20,9 +26,9 @@
         </activity>
 
         <service
-            android:name=".ChromeWallpaper"
+            android:name=".NcsWallpaper"
             android:exported="true"
-            android:label="Aphex Chrome"
+            android:label="Cornholio NCS"
             android:permission="android.permission.BIND_WALLPAPER">
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
@@ -30,6 +36,17 @@
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/wallpaper" />
+        </service>
+
+        <!-- only so the wallpaper may ask which song is playing (song letters, off by default) -->
+        <service
+            android:name=".SongListener"
+            android:exported="true"
+            android:label="Cornholio NCS song letters"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
         </service>
     </application>
 </manifest>

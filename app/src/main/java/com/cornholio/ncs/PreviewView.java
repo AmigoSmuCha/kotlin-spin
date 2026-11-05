@@ -1,22 +1,19 @@
-package com.aphexspin.chrome;
+package com.cornholio.ncs;
 
 import android.content.Context;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-/** The live picture behind the settings plate: the same renderer, one finger spins it here. */
+/** The live picture in settings: the same renderer playing the demo song; any finger paints the letters here. */
 public class PreviewView extends SurfaceView implements SurfaceHolder.Callback {
     private final Runner runner;
     private boolean resumed, ready;
-    private float lastX, lastY;
-    private long lastT;
-    private final double[] vel = new double[2];
 
     public PreviewView(Context c) {
         super(c);
         getHolder().addCallback(this);
-        runner = new Runner(c, getHolder(), false);
+        runner = new Runner(c, getHolder(), false, true);
     }
 
     void resume() {
@@ -52,33 +49,25 @@ public class PreviewView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        int w = Math.max(1, getWidth()), h = Math.max(1, getHeight());
-        float x = e.getX(), y = e.getY();
-        long t = e.getEventTime();
         switch (e.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                getParent().requestDisallowInterceptTouchEvent(true);
-                lastX = x;
-                lastY = y;
-                lastT = t;
-                vel[0] = vel[1] = 0;
-                runner.touchStart();
+                if (getParent() != null) getParent().requestDisallowInterceptTouchEvent(true);
+                runner.paintStart(e.getPointerId(0), e.getX(0), e.getY(0));
                 return true;
-            case MotionEvent.ACTION_MOVE: {
-                double k = 3.2 / w;
-                double ax = (y - lastY) * k, ay = (x - lastX) * k;
-                double et = Math.max(1 / 120.0, (t - lastT) / 1000.0);
-                vel[0] = 0.55 * vel[0] + 0.45 * ax / et;
-                vel[1] = 0.55 * vel[1] + 0.45 * ay / et;
-                runner.dragBy(ax, ay, x / w * 2.0 - 1.0, 1.0 - y / h * 2.0);
-                lastX = x;
-                lastY = y;
-                lastT = t;
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                int i = e.getActionIndex();
+                runner.paintStart(e.getPointerId(i), e.getX(i), e.getY(i));
                 return true;
             }
+            case MotionEvent.ACTION_MOVE:
+                for (int i = 0; i < e.getPointerCount(); i++) runner.paint(e.getPointerId(i), e.getX(i), e.getY(i));
+                return true;
+            case MotionEvent.ACTION_POINTER_UP:
+                runner.paintEnd(e.getPointerId(e.getActionIndex()));
+                return true;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                runner.touchEnd(t - lastT < 80 ? new double[]{vel[0], vel[1]} : null);
+                runner.paintEnd(-1);
                 return true;
             default:
                 return true;

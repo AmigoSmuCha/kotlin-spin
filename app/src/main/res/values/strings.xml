@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="description">an inflated chrome logo, raymarched into ascii · two fingers spin it</string>
-    <string name="author">aphex_spin</string>
+    <string name="description">cornholio\'s NCS visualizer, listening to what the phone plays · two fingers paint the letters</string>
+    <string name="author">cornholio</string>
 </resources>

@@ -1,77 +1,34 @@
-"""Frame-for-frame check of the Java port against aphex_spin.py --preview (run via tools/parity/run.sh)."""
-import re, subprocess, sys
-SGR = re.compile(r"\x1b\[([0-9;]*)m")
-
-def parse_py(text, cols, rows):
-    grid = []
-    for line in text.split("\n")[:rows]:
-        fg = bg = None
-        cells = []
-        i = 0
-        while i < len(line):
-            m = SGR.match(line, i)
-            if m:
-                ps = [int(x) for x in m.group(1).split(";") if x != ""] or [0]
-                j = 0
-                while j < len(ps):
-                    p = ps[j]
-                    if p == 0: fg = None; bg = None; j += 1
-                    elif p == 38 and ps[j+1] == 2: fg = (ps[j+2] << 16) | (ps[j+3] << 8) | ps[j+4]; j += 5
-                    elif p == 48 and ps[j+1] == 2: bg = (ps[j+2] << 16) | (ps[j+3] << 8) | ps[j+4]; j += 5
-                    else: j += 1
-                i = m.end(); continue
-            cells.append((line[i], fg, bg)); i += 1
-        while len(cells) < cols: cells.append((" ", None, None))
-        grid.append(cells[:cols])
-    return grid
-
-def run(cols, rows, pal, mat, mode, charset, backdrop, yaw=0.0, pitch=0.0):
-    args = ["python3", "aphex_spin.py", "--preview", "--size", "%dx%d" % (cols, rows), "--palette", pal,
-            "--material", mat, "--glyphs", mode, "--charset", charset, "--workers", "0", "--yaw", str(yaw), "--pitch", str(pitch)]
-    if backdrop: args.append("--backdrop")
-    py = subprocess.run(args, capture_output=True, text=True).stdout
-    G = parse_py(py, cols, rows)
-    jv = subprocess.run(["java", "-cp", "build/parity", "Parity", "frame", str(cols), str(rows), pal, mat, mode, charset,
-                         "1" if backdrop else "0", str(yaw), str(pitch)], capture_output=True, text=True).stdout.split("\n")
-    tot = dch = dfg = 0
-    maxd = 0
-    for r in range(rows):
-        for c in range(cols):
-            ch, f1, b1 = jv[r * cols + c].split()
-            ch, f1, b1 = chr(int(ch)), int(f1), int(b1)
-            pc, pf, pb = G[r][c]
-            if mode == "block":
-                tot += 1
-                # python: fg = top, bg = bottom (ground cells come as the base bg)
-                for jvv, pyv in ((f1, pf), (b1, pb)):
-                    if pyv is None: pyv = 0
-                    d = max(abs(((jvv >> s) & 255) - ((pyv >> s) & 255)) for s in (0, 8, 16))
-                    maxd = max(maxd, d)
-                    if d > 4: dfg += 1
-                continue
-            if ch == " " and pc == " ": continue
+"""Frame-for-frame check of the app's scene against cornholio.py itself: the same glyph, ink,
+ground and boldness in every cell, the same levels, beats and hits. Run through run.sh."""
+import json, sys, subprocess
+def load(cmd):
+    out = subprocess.run(cmd, capture_output=True, text=True)
+    if out.returncode != 0: print(out.stderr[-3000:]); sys.exit(1)
+    return [json.loads(l) for l in out.stdout.strip().split("\n") if l.startswith("{")]
+def compare(visual, W=48, H=42, frames=150, theme="default", show_first=True, title="", finger=False):
+    extra = [title, "1" if finger else "0"]
+    py = load(["python3", "tools/parity/ref.py", visual, str(W), str(H), str(frames), theme] + extra)
+    jv = load(["java", "-cp", "build/parity", "Run", visual, str(W), str(H), str(frames), theme] + extra)
+    first_bad = None; tot = 0; bad_ch = bad_fg = bad_bg = bad_bold = 0; lvl = 0.0; beatdiff = 0
+    for p, j in zip(py, jv):
+        lvl = max(lvl, max(abs(a - b) for a, b in zip(p["levels"], j["levels"])))
+        if p["beats"] != j["beats"] or p["hits"] != j["hits"]: beatdiff += 1
+        n = W * H
+        for i in range(n):
             tot += 1
-            if ch != pc: dch += 1
-            elif ch != " " and pf is not None and f1 >= 0:
-                d = max(abs(((f1 >> s) & 255) - ((pf >> s) & 255)) for s in (0, 8, 16))
-                maxd = max(maxd, d)
-                if d > 4: dfg += 1
-    return tot, dch, dfg, maxd
-
-cases = [
-    (100, 42, "aphex", "chrome", "shape", "all", False),
-    (100, 42, "axel clay", "chrome", "shape", "all", False),
-    (100, 42, "nord", "gloss", "shape", "all", False),
-    (100, 42, "miasma", "satin", "shape", "symbols", False),
-    (100, 42, "gruvbox", "gold", "ramp", "all", False),
-    (100, 42, "dracula", "obsidian", "shape", "all", True),
-    (100, 42, "graphite", "bone", "block", "all", False),
-    (44, 39, "catppuccin", "chrome", "shape", "all", True),
-    (44, 39, "integral lab", "gloss", "shape", "all", False),
-]
-if len(sys.argv) > 1: cases = cases[:int(sys.argv[1])]
-for cs in cases:
-    for yaw, pitch in ((0.0, 0.0), (1.1, 0.3)):
-        tot, dch, dfg, maxd = run(*cs, yaw=yaw, pitch=pitch)
-        print("%-58s yaw %.1f  cells %5d  glyph diff %4d (%.2f%%)  colour diff>4: %d  max channel diff %d" % (
-            " ".join(str(x) for x in cs), yaw, tot, dch, 100.0 * dch / max(1, tot), dfg, maxd))
+            c1, c2 = p["ch"][i], j["ch"][i]
+            e = False
+            if c1 != c2: bad_ch += 1; e = True
+            elif c1 != " " and p["fg"][i] != j["fg"][i]: bad_fg += 1; e = True
+            if p["bg"][i] != j["bg"][i]: bad_bg += 1; e = True
+            if p["bold"][i] != j["bold"][i]: bad_bold += 1; e = True
+            if e and first_bad is None: first_bad = (p["f"], i % W, i // W, c1, c2, p["fg"][i], j["fg"][i], p["bg"][i], j["bg"][i])
+    print("%-10s %-14s %dx%d %d frames: cells %d  glyph diff %d  ink diff %d  ground diff %d  bold diff %d  | max level diff %.2e  frames with other beat/hit counts %d"
+          % (visual, theme, W, H, frames, tot, bad_ch, bad_fg, bad_bg, bad_bold, lvl, beatdiff))
+    if first_bad and show_first: print("   first difference: frame %d at (%d, %d): %r vs %r  fg %s vs %s  bg %s vs %s" % first_bad)
+if __name__ == "__main__":
+    looks = sys.argv[1:] or ["bars", "mirror", "kerosene", "lorn", "diffision"]
+    for v in looks:
+        compare(v)
+    for v in looks:
+        compare(v, 60, 52, 160, "phosphor", title="Mezi Mosty", finger=True)
